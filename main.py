@@ -2,18 +2,17 @@
 
 import pyinputplus as pyip
 import cv2 as cv
-import requests, time, webbrowser, csv
-
-# create a csv file to collect the vote count
-# with open("votes.csv", "w+") as f:
+import requests, time, webbrowser, csv, os
 
 
 
-def print_pause(*args, pause: int=2) -> None:
+def print_pause(*args, pause: int=0) -> None:
     '''prints the string slowly based on the 
     time set. Default is 2 secs'''
+
     print(*args)
     time.sleep(pause)
+
 
 def intro_msg() -> str:
     ''' prints the introductory message '''
@@ -34,33 +33,23 @@ def intro_msg() -> str:
     print_pause("LinkendIn link = https://www.linkedin.com/in/nwarienne-michael-378b5a183") 
     print_pause("************************************************************************") 
 
-    print_pause("Wecome to my voting app")
+    print_pause("Wecome to my voting app\n")
+    return
 
 
 def user_choice() -> int:
     ''' returns the user option '''
 
-    # user_option = {
-    #     1: "Accreditation",
-    #     2: "Cast Vote",
-    #     3: "Upload Result",
-    #     4: "View Result",
-    # }
-    # print_pause("Please pick the corresponding number"
-    #             "from the following options")
-    # for key, value in user_option.items():
-    #     print_pause(key, ":", value)
-
     while True:
-        user_prompt = pyip.inputMenu(["Accreditation", "Cast Vote", "Upload Result", "View Result"],
+        user_prompt = pyip.inputMenu(["Accreditation", "Cast Vote", "Upload Image", "View Result\n"],
                                      prompt="Please pick the corresponding number"
-                                     "from the following options: ", 
+                                     " from the following options: \n", 
                                      numbered=True)
 
-        print_pause(f"Just to confirm, Are you sure you"
-                    "want to proceed with {user_option[user_choice]}?")
+        print_pause("Just to confirm, Are you sure you"
+                    f" want to proceed with {user_prompt}?")
         
-        bool_ans = pyip.inputYesNo(prompt="Answer yes(y) or no(n)",)
+        bool_ans = pyip.inputYesNo(prompt="Answer yes(y) or no(n): \n",)
         if bool_ans == 'no':
             continue
         break
@@ -73,27 +62,38 @@ def validate_voter(user_input: int) -> None:
     registered_card = ["123456789", "987654321", "456789123"]
     if user_input not in registered_card:
         raise ValueError("Your voter's card is not registered")
+    return
 
 
 def accreditation() -> None:
-    '''verifies the new/existing voter'''
+    '''
+    func when user_choice = Accreditation
+
+    verifies the new/existing voter'''
+
     verified_list = []
     card_nos = pyip.inputCustom(validate_voter, 
                      prompt="Please enter your voter's" 
-                     "card number: ")
+                     " card number: ")
     try:
         if card_nos not in verified_list:
             verified_list.append(card_nos)
+            print("You are now verified")
     except:
         print("You've already been verified")
+    return
 
 
 def cast_vote() -> int:
-    ''' takes the user's vote'''
+    ''' 
+    func when user_choice = Cast Vote
+    
+    takes the user's vote'''
+
     print_pause("Carefully choose the corresponding number for your"
-                "party of choice.")
-    user_vote = pyip.inputInt(
-    prompt="1. Action Democratic Party (ADP)\n"
+                " party of choice.")
+    
+    print_pause("1. Action Democratic Party (ADP)\n"
             "2. African Democratic Congress (ADC)\n"
             "3. African Democratic Party (ADP)\n"
             "4. All Grassroots Alliance (AGA)\n"
@@ -103,8 +103,102 @@ def cast_vote() -> int:
             "8. Labour Party (LP)\n"
             "9. Peoples Democratic Party (PDP)\n"
             "10. Progressive Peoples Alliance (PPA)\n"
-            "11. Young Progressives Party (YPP)",
-    max=11, min=1
-    )
+            "11. Young Progressives Party (YPP)\n"
+            )
+    user_vote = pyip.inputNum(prompt=
+                              "\nEnter your party's number here: ",
+                              max=11, min=1)
     
-def 
+    print_pause("\nYour vote has been recorded successfully")
+    return user_vote
+
+    
+def record_vote() -> None:
+    '''records the user's vote in the spreadsheet'''
+
+    with open("votes.csv", "r+") as file:
+        vote_num = cast_vote()
+        vote_list = []
+        csv_reader = csv.DictReader(file)
+        for row in csv_reader:
+            if row["index"] == vote_num:
+                old_party = row["party"]
+                new_count = row["count"] + 1
+        vote_list.append(vote_num)
+        vote_list.append(old_party)
+        vote_list.append(new_count) 
+        return vote_list
+
+        
+def add_vote() -> None:
+    with open("votes.csv", 'a') as file:
+        vote_details = record_vote()
+        for i in vote_details:
+            index = vote_details[0]
+            party = vote_details[1]
+            count = vote_details[2]
+        file_writer = csv.DictWriter(file,
+                                     ["index", "party", "count"])
+        file_writer.writerow({"index": index, "party": party, "count":count})
+    return
+
+
+def upload_image() -> str:
+    '''
+    func when user_choice = Upload Image
+    '''
+    camera = cv.VideoCapture(0)
+    return_value, image = camera.read()
+    cv.imwrite('result.jpg', image)
+    del(camera)
+    img = cv.imread('result.jpg')
+    cv.imshow('Captured Image', img)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    url = 'https://github.com/Mr-cyber200/python-script'
+    files = {'file': open('result.jpg', 'rb')}
+    r = requests.post(url, files=files)
+    print_pause(r.text)
+    print_pause("Image captured and uploaded to portal")
+    return
+
+def view_result() -> None:
+    '''func when user_choice = View Result '''
+
+    print("Redirecting you to the result page...")
+    webbrowser.open("https://www.inecelectionresults.ng/elections/types")
+    return
+
+
+def create_csv() -> None:
+    '''
+    create a csv file to collect the vote count
+    '''
+    with open("votes.csv", "w") as f:
+        pol_party = ["ADP","ADC","AfDP","AGA","APC","APGA", "DPP",
+        "LP","PDP","PPA","YPP"]
+        write_obj = csv.DictWriter(f, ["index", "party", "count"])
+        write_obj.writeheader()
+
+        for index, party in enumerate(pol_party, start=1):
+            write_obj.writerow({"index": index, "party": party, "count": 0})
+    return
+
+def main() -> None:
+    intro_msg()
+    voter_choice = user_choice()
+    if voter_choice == "Accreditation":
+        accreditation()
+    elif voter_choice == "Cast Vote":
+        add_vote()
+    elif voter_choice == "Upload Image":
+        upload_image()
+    elif voter_choice == "View Result":
+        view_result()
+    return
+if __name__ == "__main__":
+    if not os.path.exists("votes.csv"):
+        create_csv()
+    main()
+    # add_vote()
+
