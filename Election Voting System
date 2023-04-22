@@ -2,9 +2,6 @@
 
 import pyinputplus as pyip
 
-# def intro_msg() -> str:
-    # prints out the introductory messages
-'''Let there be a pause in between print for dramatic effects'''
 
 print("************************************************************************\ ") 
 print("@@@@@@@@@@@@@@@@@@@@ copyright of Mr_Cyber 2023 @@@@@@@@@@@@@@@@@@@@@@@@/") 
@@ -27,8 +24,7 @@ print("\n")
 
 
 #This code prompts the user to make a choice depending on the action they want to take.
-'''Print the custom message with a print function 
-before using pyinputplus'''
+
 user_action = int(input("""What do you want to do?
                         1. accreditation
                         2. cast vote
@@ -37,8 +33,12 @@ user_action = int(input("""What do you want to do?
 print("You have selected: ", user_action,)
 
 #The code provides the user with different options according to the user input.
-'''Author did not account for test case if user_action is not a number
-That crashes the code'''
+'''Author did not account for test case if user_action is not a number.
+That crashes the code.
+Secondly, When you have too many test cases, 
+you should take a second look
+at your code
+'''
 choice_name = ""
 if user_action == 1:
     choice_name = "accreditation"
@@ -60,11 +60,12 @@ while answer not in ["Yes", "yes", "Y", "y", "No", "no", "N", "n"]:
         print("Welcome:\n", choice_name.upper()) 
     elif answer=="No" or answer=="no" or answer=="N" or answer=="n": 
         print("Re-input your choice\n")
-type(user_action) # what does this line do?
+type(user_action) 
+'''what does the above line => type(user_action) do?'''
 
 
 #This code verifies the voter's card number against the list in the database and adds it to the verified list if it is valid.
-'''pyinputplus takes care of this'''
+
 if user_action == 1:
     voter_card_number = input("Please enter your voter's card number: ")
     database = ["123456789", "987654321", "456789123"]
@@ -80,8 +81,29 @@ if user_action == 1:
 
 #This code allows the user to select a political party and vote for it, while also keeping track of the number of votes in a text file.
 if user_action == 2:
+    
     print("Choose the political party you want to vote for: \n1. Action Democratic Party (ADP)\n2. African Democratic Congress (ADC)\n3. African Democratic Party (ADP)\n4. All Grassroots Alliance (AGA)\n5. All Progressives Congress (APC)\n6. All Progressives Grand Alliance (APGA)\n7. Democratic People's Party (DPP)\n8. Labour Party (LP)\n9. Peoples Democratic Party (PDP)\n10. Progressive Peoples Alliance (PPA)\n11. Young Progressives Party (YPP)")
+    '''This above line violates PEP8 guidelines.
+    It is way too long
+    You could typed different parties on different lines.
+    '''
     party_choice = int(input("Enter the number of the political party you want to vote for: "))
+    '''this is not good at all.
+    there is a principle in programming called: DRY
+    stands for Don't Repeat Yourself
+    You should always find a way to abstract away recurrent tasks in 
+    function.
+
+    Secondly, Don't you think that what you're doing is data collection?
+    It is better collected as a flat file(e.g. csv, tsv etc.). 
+    That is easily collated and can also be analyzed.
+
+    Thirdly, opening 11 new files for a related task will really slow your code down.
+    If this were production code, you'll be costing your organization a lot of money
+    in server fees.
+
+    Fourthly, I hope I didn't sound too harsh. Just want to help you learn.
+   '''
     if party_choice == 1:
         with open('ADP_list.txt', 'a+') as f:
             last_value = f.readlines()
