@@ -2,6 +2,7 @@
 
 import pyinputplus as pyip
 import cv2 as cv
+import pandas as pd
 import requests, time, webbrowser, csv, os
 
 
@@ -108,38 +109,17 @@ def cast_vote() -> int:
     user_vote = pyip.inputNum(prompt=
                               "\nEnter your party's number here: ",
                               max=11, min=1)
-    
-    print_pause("\nYour vote has been recorded successfully")
     return user_vote
 
     
 def record_vote() -> None:
-    '''records the user's vote in the spreadsheet'''
+    '''records the user's vote in the flat file'''
 
-    with open("votes.csv", "r+") as file:
-        vote_num = cast_vote()
-        vote_list = []
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            if row["index"] == vote_num:
-                old_party = row["party"]
-                new_count = row["count"] + 1
-        vote_list.append(vote_num)
-        vote_list.append(old_party)
-        vote_list.append(new_count) 
-        return vote_list
-
-        
-def add_vote() -> None:
-    with open("votes.csv", 'a') as file:
-        vote_details = record_vote()
-        for i in vote_details:
-            index = vote_details[0]
-            party = vote_details[1]
-            count = vote_details[2]
-        file_writer = csv.DictWriter(file,
-                                     ["index", "party", "count"])
-        file_writer.writerow({"index": index, "party": party, "count":count})
+    vote_num = cast_vote()
+    df = pd.read_csv("votes.csv", index_col="serial")
+    df.loc[vote_num, "count"]+=1
+    df.to_csv("votes.csv", index=True, sep=",")    
+    print_pause("\nYour vote has been recorded successfully")
     return
 
 
@@ -172,33 +152,36 @@ def view_result() -> None:
 
 def create_csv() -> None:
     '''
-    create a csv file to collect the vote count
+    creates a csv file to collect the vote count
     '''
     with open("votes.csv", "w") as f:
         pol_party = ["ADP","ADC","AfDP","AGA","APC","APGA", "DPP",
         "LP","PDP","PPA","YPP"]
-        write_obj = csv.DictWriter(f, ["index", "party", "count"])
+        write_obj = csv.DictWriter(f, ["serial", "party", "count"])
         write_obj.writeheader()
 
         for index, party in enumerate(pol_party, start=1):
-            write_obj.writerow({"index": index, "party": party, "count": 0})
+            write_obj.writerow({"serial": index, "party": party, "count": 0})
     return
 
 def main() -> None:
+    '''main function for the script'''
     intro_msg()
     voter_choice = user_choice()
     if voter_choice == "Accreditation":
         accreditation()
     elif voter_choice == "Cast Vote":
-        add_vote()
+        record_vote()
     elif voter_choice == "Upload Image":
         upload_image()
     elif voter_choice == "View Result":
         view_result()
     return
+
+
 if __name__ == "__main__":
     if not os.path.exists("votes.csv"):
         create_csv()
     main()
-    # add_vote()
+    
 
