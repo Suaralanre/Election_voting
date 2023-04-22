@@ -7,9 +7,9 @@ import requests, time, webbrowser, csv, os
 
 
 
-def print_pause(*args, pause: int=0) -> None:
+def print_pause(*args, pause: int=1) -> None:
     '''prints the string slowly based on the 
-    time set. Default is 2 secs'''
+    time set. Default is 1 secs'''
 
     print(*args)
     time.sleep(pause)
